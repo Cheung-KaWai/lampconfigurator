@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "/node_modules/three/examples/jsm/controls/OrbitControls";
 import { TransformControls } from "/node_modules/three/examples/jsm/controls/TransformControls";
-import { ObjectLoader } from "three";
+import { Light, ObjectLoader, SpotLightHelper } from "three";
 import { spotLight, sunlightInit } from "./light";
 import { floor, wall, wood2, metal } from "./room";
 import basicRectangle from "../assets/models/tableSize.glb?url";
@@ -19,14 +19,17 @@ const canvas = document.querySelector("#lamp");
 const angles = document.querySelector(".angle");
 const temp = document.querySelector(".temp");
 const roomLight = document.querySelector("#roomLight");
+const tilt = document.querySelector("#tilt");
+const rotation = document.querySelector("#rotation");
 
 let dimension = {
   width: window.innerWidth - 500,
   height: window.innerHeight,
 };
 
-let scene, camera, renderer, lamp, lampHelper, controls, pane, sunlight, room, dirL;
+let scene, camera, renderer, lamp, controls, pane, sunlight, room, transformControl, helper;
 let targetObject = new THREE.Object3D();
+let offset = 0;
 
 function init() {
   // init scene
@@ -49,30 +52,18 @@ function init() {
   renderer.physicallyCorrectLights = true;
   renderer.outputEncoding = THREE.sRGBEncoding;
 
-  // lamp
+  lamp;
   lamp = new THREE.SpotLight();
-  lamp.angle = Math.PI / 12;
+  lamp.angle = Math.PI / 3;
   lamp.intensity = 0.04;
   lamp.penumbra = 1;
   lamp.decay = 2;
-  lamp.power = 790;
   lamp.position.set(0, 2.5, 0);
-  lampHelper = new THREE.SpotLightHelper(lamp);
+  helper = new THREE.SpotLightHelper(lamp);
 
-  // daylight
   sunlight = sunlightInit();
-  // dirL = dirLight();
-  // const sunlightHelper = new THREE.Amb(sunlight);
-
   room = floor();
-
-  const transformControl = new TransformControls(camera, renderer.domElement);
-  transformControl.addEventListener("dragging-changed", function (event) {
-    controls.enabled = !event.value;
-    targetObject.position.set(lamp.position.x, 0, lamp.position.z);
-    lamp.target = targetObject;
-  });
-  transformControl.attach(lamp);
+  transformControl = initTransformControl();
 
   gltfLoader.load(basicRectangle, (glb) => {
     const table = glb.scene;
@@ -99,15 +90,15 @@ function init() {
   scene.add(
     camera,
     lamp,
-    lampHelper,
+    lamp.target,
     sunlight,
     room,
     targetObject,
     wall([0, 1.2, -2.1], 0),
     wall([2.1, 1.2, 0], Math.PI / 2),
     wall([-2.1, 1.2, 0], Math.PI / 2),
-
-    transformControl
+    transformControl,
+    helper
   );
 
   window.addEventListener("resize", onWindowResize);
@@ -136,11 +127,29 @@ function onWindowResize() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 }
 
+function initTransformControl() {
+  const transform = new TransformControls(camera, renderer.domElement);
+  transform.showY = false;
+  transform.size = 0.25;
+  transform.addEventListener("change", function () {
+    targetObject.position.set(lamp.position.x + offset, 0, lamp.position.z);
+    lamp.target = targetObject;
+  });
+  transform.addEventListener("mouseDown", () => {
+    controls.enabled = false;
+  });
+  transform.addEventListener("mouseUp", () => {
+    controls.enabled = true;
+  });
+  transform.attach(lamp);
+  return transform;
+}
+
 init();
 
 angles.addEventListener("change", (ev) => {
+  helper.update();
   lamp.angle = (ev.target.value * Math.PI) / 180;
-  lampHelper.update();
 });
 
 temp.addEventListener("change", (ev) => {
@@ -151,6 +160,24 @@ temp.addEventListener("change", (ev) => {
 
 roomLight.addEventListener("input", (ev) => {
   sunlight.intensity = ev.target.value;
+});
+
+tilt.addEventListener("input", (ev) => {
+  helper.update();
+  const angleLamp = ev.target.value;
+  offset = Math.tan((angleLamp * Math.PI) / 180) * 2.5;
+  targetObject.position.set(lamp.position.x + offset, 0, lamp.position.z);
+
+  // lamp.rotateX((angleLamp * Math.PI) / 180);
+  // targetObject.rotateX((angleLamp * Math.PI) / 180);
+});
+rotation.addEventListener("input", (ev) => {
+  helper.update();
+  const rotate = (ev.target.value * Math.PI) / 180;
+  const x = lamp.position.x + offset * Math.cos(rotate);
+  const z = lamp.position.z + offset * Math.sin(rotate);
+  targetObject.position.set(x, 0, z);
+  // console.log(rotate);
 });
 
 /////////////////////////////////////// DEBUGER //////////////////////////

@@ -1,6 +1,7 @@
 import * as THREE from "three";
 
 const textureLoader = new THREE.TextureLoader();
+const cubeTextureLoader = new THREE.CubeTextureLoader();
 
 const tableColorTextureWood2 = textureLoader.load("/src/assets/textures/Wood051_1K_Color.jpg");
 const tableRoughnessTextureWood2 = textureLoader.load("/src/assets/textures/Wood051_1K_Roughness.jpg");
@@ -11,13 +12,22 @@ const metalRoughness = textureLoader.load("/src/assets/textures/Metal009_1K_Roug
 const normalMap = textureLoader.load("/src/assets/textures/Metal009_1K_NormalDX.jpg");
 const metallicMap = textureLoader.load("/src/assets/textures/Metal009_1K_Metalness.jpg");
 
+const environmentMapTexture = cubeTextureLoader.load([
+  "/src/assets/environments/px.png",
+  "/src/assets/environments/nx.png",
+  "/src/assets/environments/py.png",
+  "/src/assets/environments/ny.png",
+  "/src/assets/environments/pz.png",
+  "/src/assets/environments/nz.png",
+]);
+
 export const metal = {
   map: metalColorTexture,
   roughness: 0,
   metalnessMap: metallicMap,
   metalness: 1,
-  // envMap: environmentMapTexture,
-  // envMapIntensity: 0.3,
+  envMap: environmentMapTexture,
+  envMapIntensity: 0.3,
   normalMap: normalMap,
   roughnessMap: metalRoughness,
 };
