@@ -9,6 +9,26 @@
   </head>
   <body>
     <canvas id="lamp"></canvas>
+    <div class="configuration">
+      <div class="angle">
+        <select name="angle" id="angle">
+          <option value="15">15°</option>
+          <option value="36">36°</option>
+          <option value="60">60°</option>
+        </select>
+      </div>
+      <div class="temp">
+        <select name="temp" id="temp">
+          <option>select warmth light</option>
+          <option value="255 169 87">2700K</option>
+          <option value="255 180 107">3000K</option>
+          <option value="255 209 163">4000K</option>
+        </select>
+      </div>
+      <div class="roomLight">
+        <p>room light</p>
+        <input type="range" min="0" max="20" step="0.01" id="roomLight">
+    </div>
     <script type="module" src="/src/js/main.js"></script>
   </body>
 </html>

@@ -4,8 +4,26 @@
   box-sizing: border-box;
 }
 
+html {
+  font-size: 62.5%;
+}
+
+body {
+  font-size: 1.6rem;
+}
+
 #lamp {
   position: fixed;
   top: 0;
   left: 0;
+}
+
+.configuration {
+  z-index: 10;
+  background-color: #fff;
+  width: 50rem;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  right: 0;
 }
